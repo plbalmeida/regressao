@@ -1,0 +1,213 @@
+---
+title: "Aprendizagem supervisioanda com R"
+author: "Pedro Almeida"
+date: "17 de fevereiro de 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1) O que é uma regressão?
+
+Na primeira parte desse código, será apresentdo o conceito de regressão do ponto de vista da aprendizagem de máquina. Será apresentado o método de regressão fundamental: a regressão linear. Mostrarei como ajustar um modelo de regressão linear e fazer previsões a partir do modelo.
+
+### Codando uma regressão com uma variável independente
+
+Será utilizado nesse RMarkdown os dados de desemprego de homens e mulheres dos Estados Unidos ao logo de vários anos, fonte dos dados: <http://college.cengage.com/mathematics/brase/understandable_statistics/7e/students/datasets/slr/frames/slr02.html>.
+
+A tarefa aqui é prever a taxa de desemprego feminino a partir da taxa observada de desemprego masculino, respectivamente as variáveis no dataset são female_unemployment e male_unemployment.
+
+```{r, message=FALSE, warning=FALSE}
+
+# importando os dados
+unemployment <- read.delim(file = "unemployment.txt", sep = "")
+
+# verificando os quantis dos dados
+summary(unemployment[,2:3])
+
+# definindo a fórmula que expressa female_unemployment em função de male_unemployment
+fmla <- female_unemployment ~ male_unemployment
+
+# fitando o modelo em unemployment_model
+unemployment_model <-  lm(fmla, data = unemployment)
+
+# visualizando o modelo 
+unemployment_model
+
+```
+
+O coeficiente do desemprego masculino é positivo, de modo que o desemprego feminino aumenta à medida que o desemprego masculino aumenta, lembrando que a regressão linear é a mais básica das abordagens de regressão.
+
+### Examinando o modelo de regressão linear
+
+Utilizando a função summary() é possível verificar os residuais do modelo, o coeficiente beta, o erro padrão, o valor t e a significancia estatística da variável independente no modelo. Assim como outras métricas de acurácia do modelo que abordarei mais a frente.
+
+```{r, message=FALSE, warning=FALSE}
+
+summary(unemployment_model)
+
+```
+
+### Fazendo predições a partir do modelo
+
+```{r, message=FALSE, warning=FALSE}
+
+# predizendo o desemprego entre mulheres a partir da taxa de desemprego entre homens
+newrates <- data.frame(male_unemployment = 5) # taxa de desemprego entre homens igual a 5%
+pred <- predict(unemployment_model, newdata = newrates)
+pred
+
+```
+
+### Visualizando o modelo de regressão linear
+
+```{r, message=FALSE, warning=FALSE}
+
+library(ggplot2)
+
+ggplot(unemployment, aes(x = male_unemployment, y = female_unemployment)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+### Regressão multivariada
+
+Nos exemplos de regressão multivariada será utilizado o dataset bloodpressure, no qual irei modelar a pressão em função o peso e idade, fonte dos dados <http://college.cengage.com/mathematics/brase/understandable_statistics/7e/students/datasets/mlr/frames/frame.html>.
+
+```{r, message=FALSE, warning=FALSE}
+
+# importando os dados
+bloodpressure <- read.delim(file = "bloodpressure.txt", sep = "")
+
+# verificando os quantis dos dados
+summary(bloodpressure[,2:4])
+
+# criando a fórmula
+fmla <- blood_pressure ~ age + weight
+
+# fitando o modelo: bloodpressure_model
+bloodpressure_model <- lm(fmla, data = bloodpressure)
+
+# examinando o modelo
+summary(bloodpressure_model)
+
+```
+
+Uma das vantagens da regressão linear é que você pode interpretar os efeitos de cada variável independente. Nesse caso, os coeficientes para idade e peso são positivos, o que indica que a pressão sanguínea tende a aumentar à medida que a idade e o peso aumentam.
+
+### Fazendo predições do modelo de regressão multivariada e visualizando
+
+```{r, message=FALSE, warning=FALSE}
+
+# predizendo pressão usando o modelo bloodpressure_model
+bloodpressure$prediction <- predict(bloodpressure_model)
+
+# visualizando os resultados
+ggplot(bloodpressure, aes(x = prediction, y = blood_pressure)) + 
+    geom_point() +
+  geom_smooth(method = "lm")
+
+```
+
+Os resultados do modelo ficaram bem ajustados aos dados observados da variável dependente, indicando que o modelo se ajusta bem aos dados de treinamento. A partir de uma perspectiva de predição, a regressão linear multivariada se comporta da mesma forma que a simples (de uma variável).
+
+## 2) Treinando e avaliando modelos de regressão
+
+Agora que tivemos uma intuição sobre modelos mais básicos de regressão linear, aprenderemos a avaliar o desempenho de nossos modelos. Analisaremos a avaliação de um modelo graficamente e analisaremos duas métricas básicas para modelos de regressão. Também aprenderemos como treinar um modelo de modo  que ele funcione bem para dados não vistos no dataset, e não apenas em dados de treinamento.
+
+### Avaliando o modelo unemployment_model graficamente
+
+Aqui visualizaremos o quanto o modelo e suas predições podem errar. Na sequência faremos o cálculo do quanto um modelo pode errar em média.
+
+```{r, message=FALSE, warning=FALSE}
+
+# predição do modelo
+unemployment$predictions <- predict(unemployment_model)
+
+# predição X variável dependente
+ggplot(unemployment, aes(x = predictions, y = female_unemployment)) + 
+  geom_point() +
+  geom_smooth(method = "lm")
+
+# calculando o residual
+unemployment$residuals <- unemployment$female_unemployment - unemployment$predictions
+
+# visualizando os residuais do modelo
+ggplot(unemployment, aes(x = predictions, y = residuals)) + 
+  geom_pointrange(aes(ymin = 0, ymax = residuals)) + 
+  geom_hline(yintercept = 0, linetype = 3) + 
+  ggtitle("residuals vs. linear model prediction")
+
+```
+
+### Raíz da média dos residuais ao quadrado
+
+Em inglês é root-mean-square error (RMSE), que mostra o quanto a predição do modelo está errando, essa é uma das métricas de acurácia de um modelo de regressão linear.
+
+```{r, message=FALSE, warning=FALSE}
+
+# criando um objeto para os residuais do modelo
+res <- unemployment$residuals
+
+# calculando a RMSE
+rmse <- sqrt(mean(res^2))
+rmse
+
+# calculando o desvio padrão da variável dependente
+sd_unemployment <- sd(unemployment$female_unemployment)
+sd_unemployment
+
+```
+
+Um RMSE menor que o desvio padrão da variável dependente, sugere um modelo que prevê bem.
+
+### Cálculo do R²
+
+Agora que vimos o RMSE das previsões do modelo, você examinará como o modelo se ajusta aos dados: ou seja, quanto de variação ele explica, e isso é feito usando R².
+
+o R² é dado por:
+
+$$R² = 1- \frac{\sum_{i=1}^n (y_i-\hat{y}_i)^2}{\sum_{i=1}^n (y_i-\overline{y})^2} $$
+
+O R² sempre vai de 0 até 1, indicando em percentagem, o quanto o modelo consegue explicar os valores observados da variável dependente.
+
+Uma maneira que gosto de pensar o R² é da seguinte maneira:
+
+1) Olhando a divisão sem o 1 subtraindo fica mais intuitivo entender o R²; 
+
+2) O numerador é a **soma dos quadrados dos residuais** do modelo, lembra que vimos os residuais do modelo um pouco mais acima no código? Então, aqui somamos todas as diferenças entre os valores observados da variável dependente e as predições do modelo (que são os y com chapéu) e elevamos ao quadrado para eliminar os possíveis sinais negativos dessas subtrações;
+
+3) O denominador é a **soma dos quadrados dos erros** dos valores observados da variável dependente. Essse "erro" é a diferença entre os valores observados da variável dependente e a média da variável dependente (o y com traço em cima), elevamos ao quadrado para evitar diferenças com sinal negativo e somamos todos os quadrados dos erros;
+
+4) Legal, a divisão entre a **soma dos quadrados dos residuais** do modelo e a **soma dos quadrados dos erros** da variável dependente, nos mostra o quanto da variável dependente é explicada pelo modelo como se fosse explicada pela média da variável dependente (e claro, nós queremos que nosso modelo explique melhor do que a média da variável dependente ok?). Exemplo: se essa divisão for igual a 0,2 quer dizer que 20% da variável dependente é explicada pelo modelo assim como é explicada pela média da variável dependente, ou seja, 20% das vezes não há diferença entre o erro do modelo (residuais!) e o erro da variável dependente;
+
+5) Logo, a soma dos erros do modelo (residuais!) é bem menor que a soma dos erros da variável dependente, isso quer dizer que 80% das vezes o modelo está mais ajustado a distribuição dos dados da variável dependente e explica a variável dependente melhor que a média, ou seja 80% da variável dependente é explicada pelo modelo!
+
+Agora vamos ver na prática:
+
+```{r, message=FALSE, warning=FALSE}
+
+# cálculo do da soma dos residuais ao quadrado (numerador)
+rss <- sum(unemployment$residuals^2)
+rss
+
+# cálculo da soma dos erros ao quadrado (denominador)
+fe_mean <- mean(unemployment$female_unemployment) # média da variável dependente
+tss <- sum((unemployment$female_unemployment - fe_mean)^2)
+tss
+
+# cálculo do R²
+rsq <- 1 - (rss/tss)
+rsq
+
+```
+
+Legal! o R² é de 0,8213157, isto significa que 82,13% da variável dependente consegue ser explicada pelo modelo!
+
+### Gerando datasets de treino e teste
+
+```{r, message=FALSE, warning=FALSE}
+```
