@@ -486,3 +486,110 @@ alcohol %>%
 ```
 
 A validação cruzada mostrou aqui que um modelo com interação dá  melhores predições.
+
+### Transformando a variável resposta antes da modelagem
+
+```{r, message=FALSE, warning=FALSE}
+
+# carregando o arquivo
+library(readxl)
+fdata <- read_excel(path = "fdata.xlsx", sheet = 1)
+
+# verificando os quantis
+summary(fdata)
+
+# examinando os dados: gerando resumos para as classes de compras grandes e pequenas
+fdata %>% 
+  group_by(label) %>% # agrupando por compras pequenas e grandes
+  summarize(min  = min(y), # valor mínimo do y
+            mean = mean(y), # média do y
+            max  = max(y)) # valor máximo do y
+
+# adicionando as colunas de residuais e de erro relativo
+fdata2 <- fdata %>% 
+  group_by(label) %>% # agrupando pela variável "label"
+  mutate(residual = pred - y, # residual
+         relerr   = residual/y) # erro relativo
+
+# comparando o RMSE e o RMSE relativo dos grupos de compras grandes e pequenas:
+fdata2 %>% 
+  group_by(label) %>% 
+  summarize(rmse = sqrt(mean(residual^2)), # RMSE
+            rmse.rel = sqrt(mean(relerr^2))) # Raíz da média dos erros relativos ao quadrado
+            
+# visualizando a predição de ambos grupos de compra
+ggplot(fdata2, aes(x = pred, y = y, color = label)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  facet_wrap(~ label, ncol = 1, scales = "free") + 
+  ggtitle("variável dependente X predição")
+
+```
+
+Observe a partir deste exemplo como um modelo com RMSE maior ainda pode ser melhor, se os erros relativos forem mais importantes que os erros absolutos.
+
+Agora  veremos como modelar uma variável dependente log-transformada, usaremos o dataset income_train e income_test. 
+
+```{r, message=FALSE, warning=FALSE}
+
+# carregando os datasets de treino e de teste
+income_train <- read_excel(path = "income_train.xlsx" , sheet = 1)
+income_test <- read_excel(path = "income_test.xlsx" ,sheet = 1)
+
+# examinando a variável Income2005 na dataset de treino
+summary(income_train$Income2005)
+
+# fórmula para o log da variável Income2005
+fmla.log <- log(Income2005) ~ Arith + Word + Parag + Math + AFQT
+
+# modelo
+model.log <- lm(fmla.log, data = income_train)
+
+# fazendo predições com o dataset de teste
+income_test$logpred <- predict(model.log, newdata = income_test)
+summary(income_test$logpred)
+
+# convertendo as predições para unidades monetárias
+income_test$pred.income <- exp(income_test$logpred)
+summary(income_test$pred.income)
+
+# visualizando as predições X variável dependente
+ggplot(income_test, aes(x = pred.income, y = Income2005)) + 
+  geom_point() + 
+  geom_abline(color = "blue")
+
+```
+
+Lembrando que quando transformarmos a variável dependente antes da modelagem, é necessário inverter a transformação das predições resultantes após a aplicação do modelo.
+
+Agora vamos comparar o RMSE e a raíz da média dos erros relativos ao quadrado. Vamos verificar como a transformação de log da variável dependente antes da modelagem melhora o erro relativo médio (mas aumenta o RMSE) em comparação com a modelagem da variável dependente sem transformação. Você irá comparar os resultados de model.log do exercício anterior com o modelo model.abs.
+
+```{r, message=FALSE, warning=FALSE}
+
+# fórmula do modelo fmla.abs
+fmla.abs <- Income2005 ~ Arith + Word + Parag + Math + AFQT
+
+# modelo sem transformação da variável dependente
+model.abs <- lm(fmla.abs, income_train)
+summary(model.abs)
+
+# adicionando as predições no dataset de teste
+income_test <- income_test %>%
+  mutate(pred.absmodel = predict(model.abs, income_test), # predições do modelo model.abs
+         pred.logmodel = exp(predict(model.log, income_test))) # predições do modelo model.log
+
+# juntando as predições e calculando os residuais e o erro relativo
+income_long <- income_test %>% 
+  gather(key = modeltype, value = pred, pred.absmodel, pred.logmodel) %>%
+  mutate(residual = pred - Income2005, # residuais
+         relerr   = residual / Income2005) # erro relativo
+
+# calculando o RMSE e o erro relativo e comparando
+income_long %>% 
+  group_by(modeltype) %>% # agrupando pela feature modeltype
+  summarize(rmse = sqrt(mean(residual^2)), # RMSE
+            rmse.rel = sqrt(mean(relerr^2))) # raíz da média dos erros relativos ao quadrado
+
+```
+
+Você viu como modelar o log de renda (variável dependente) pode reduzir o erro relativo do modelo, ao custo do aumento do RMSE, aqui temos um tradeoff e a escolha de fazer a transformação da variável dependente depende dos objetivos do seu projeto.
