@@ -338,11 +338,9 @@ rmse(mpg$pred.cv, mpg$cty)
 
 Legal! Calculamos o erro para dados não vistos através da validação cruzada!
 
-## 3) Outras considerações
+**Outras considerações:** Antes de seguir com técnicas de regressão mais avançadas, examinaremos outros problemas de modelagem: modelagem com variáveis categóricas, interações entre variáveis e quando você pode considerar a transformação de variáveis independentes (de entrada) e dependentes (de saída) antes da modelagem. Embora as técnicas de regressão mais sofisticadas gerenciem alguns desses problemas automaticamente, é importante estar ciente deles, a fim de entender quais métodos lidam melhor com esses problemas.
 
-Antes de seguir com técnicas de regressão mais avançadas, examinaremos outros problemas de modelagem: modelagem com variáveis categóricas, interações entre variáveis e quando você pode considerar a transformação de variáveis independentes (de entrada) e dependentes (de saída) antes da modelagem. Embora as técnicas de regressão mais sofisticadas gerenciem alguns desses problemas automaticamente, é importante estar ciente deles, a fim de entender quais métodos lidam melhor com esses problemas.
-
-### Variáveis categóricas no modelo
+## 3) Variáveis categóricas no modelo
 
 Nessa parte, chamaremos a função model.matrix() para examinar como o R representa dados com entradas categóricas e numéricas para modelagem. Usaremos o dataset flowers do pacote Sleuth3 que possue as seguintes variáveis:
 
@@ -382,8 +380,6 @@ head(mmat, n = 20)
 
 Agora você pode ver como a maioria das funções de modelagem no R representam variáveis categóricas internamente.
 
-### Modelagem com variáveis categóricas
-
 ```{r, message=FALSE, warning=FALSE}
 
 # modelo
@@ -407,7 +403,7 @@ ggplot(flowers, aes(x = predictions, y = Flowers)) +
 
 Legal! Fizemos um modelo com variável categórica!
 
-### Modelando interações
+## 4) Modelando interações
 
 Nessa parte, usaremos interações entre as variáveis para modelar o efeito do gênero e da atividade gástrica no metabolismo do álcool.
 
@@ -487,7 +483,7 @@ alcohol %>%
 
 A validação cruzada mostrou aqui que um modelo com interação dá  melhores predições.
 
-### Transformando a variável resposta antes da modelagem
+## 5) Transformação da variável resposta
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -593,3 +589,96 @@ income_long %>%
 ```
 
 Você viu como modelar o log de renda (variável dependente) pode reduzir o erro relativo do modelo, ao custo do aumento do RMSE, aqui temos um tradeoff e a escolha de fazer a transformação da variável dependente depende dos objetivos do seu projeto.
+
+## 6) Transformação da variável independente
+
+Vamos construir um modelo para predizer o preço em função do m². O dataset houseprice tem as seguintes colunas:
+
+* price : preço da casa em unidades de $1000
+
+* size: área
+
+O scatterplot dos dados mostram que os dados possuem uma relação não-linear: essa forma curva mostra que o preço é baixo para casas menores, mas sobe acentuadamente à medida que a casa aumenta. Os quadráticos e tríticos costumam ser boas formas funcionais para expressar esse tipo de relação entre as variáveis. Observe que pode não haver uma razão "física" para o preço estar relacionado ao m², o quadrática da variável indenpendente é simplesmente uma aproximação da relação observada.
+
+```{r, message=FALSE, warning=FALSE}
+
+# carregando o dataset
+houseprice <- read_excel(path = "houseprice.xlsx", sheet = 1)
+
+ggplot(houseprice, aes(x = size, y = price)) +
+  geom_point()
+
+```
+
+Na sequência vamos criar o modelo para predizer o preço em função do m², e vamos verificar o ajuste do modelo.
+
+```{r, message=FALSE, warning=FALSE}
+
+# verificando o dataset
+summary(houseprice)
+
+# criando a fórmula de preço em função de m²
+fmla_sqr <- price ~ I(size^2)
+
+# modelo com a variável independente transformada
+model_sqr <- lm(fmla_sqr, houseprice)
+
+# modelo sem transfomação da variável independente
+model_lin <- lm(price ~ size, houseprice)
+
+# fazendo predições e comparando
+houseprice %>% 
+  mutate(pred_lin = predict(model_lin), # predições do modelo linear
+         pred_sqr = predict(model_sqr)) %>% # predições do modelo quadrático 
+  gather(key = modeltype, value = pred, pred_lin, pred_sqr) %>% # juntando as predições
+  ggplot(aes(x = size)) + 
+    geom_point(aes(y = price)) +                  # actual prices
+    geom_line(aes(y = pred, color = modeltype)) + # the predictions
+    scale_color_brewer(palette = "Dark2")
+
+```
+
+A seguir iremos fazer a validação cruzada do modelo linear com o modelo quadrático e verificar sua acurácia.
+
+```{r, message=FALSE, warning=FALSE}
+
+# fórmula quadrática
+fmla_sqr
+
+# validação cruzado com 3 reamostragens
+set.seed(34245) # possibilita a replicação
+splitPlan <- kWayCrossValidation(nrow(houseprice), 3, NULL, NULL)
+
+# gerando modelos lineares das reamostragens
+houseprice$pred_lin <- 0 # vetor de predição
+
+for(i in 1:3) {
+  split <- splitPlan[[i]]
+  model_lin <- lm(price ~ size, data = houseprice[split$train, ])
+  houseprice$pred_lin[split$app] <- predict(model_lin, newdata = houseprice[split$app, ])
+}
+
+# gerando modelos quadráticos das reamostragens
+houseprice$pred_sqr <- 0 # vetor de predição
+
+for(i in 1:3) {
+  split <- splitPlan[[i]]
+  model_sqr <- lm(fmla_sqr, data = houseprice[split$train, ])
+  houseprice$pred_sqr[split$app] <- predict(model_sqr, newdata = houseprice[split$app, ])
+}
+
+# juntando as predições para calcular os residuais
+houseprice_long <- houseprice %>%
+  gather(key = modeltype, value = pred, pred_lin, pred_sqr) %>%
+  mutate(residuals = pred - price)
+
+# comparando o RMSE
+houseprice_long %>% 
+  group_by(modeltype) %>%
+  summarize(rmse = sqrt(mean(residuals^2)))
+
+```
+
+O modelo quadrático tem a acurácia melhor que o modelo linear.
+
+
