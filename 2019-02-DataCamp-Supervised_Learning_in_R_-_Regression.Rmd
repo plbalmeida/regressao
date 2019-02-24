@@ -15,7 +15,7 @@ Na primeira parte desse código, será apresentdo o conceito de regressão do po
 
 ### Codando uma regressão com uma variável independente
 
-Será utilizado nesse RMarkdown os dados de desemprego de homens e mulheres dos Estados Unidos ao logo de vários anos, fonte dos dados: <http://college.cengage.com/mathematics/brase/understandable_statistics/7e/students/datasets/slr/frames/slr02.html>.
+Nessa primeira parte utilizaremos os dados de desemprego de homens e mulheres dos Estados Unidos ao logo de vários anos, fonte dos dados: <http://college.cengage.com/mathematics/brase/understandable_statistics/7e/students/datasets/slr/frames/slr02.html>.
 
 A tarefa aqui é prever a taxa de desemprego feminino a partir da taxa observada de desemprego masculino, respectivamente as variáveis no dataset são female_unemployment e male_unemployment.
 
@@ -69,7 +69,7 @@ library(ggplot2)
 
 ggplot(unemployment, aes(x = male_unemployment, y = female_unemployment)) + 
   geom_point() +
-  geom_smooth(method = "lm")
+  geom_abline(color = "darkblue")
 
 ```
 
@@ -108,7 +108,7 @@ bloodpressure$prediction <- predict(bloodpressure_model)
 # visualizando os resultados
 ggplot(bloodpressure, aes(x = prediction, y = blood_pressure)) + 
     geom_point() +
-  geom_smooth(method = "lm")
+  geom_abline(color = "darkblue")
 
 ```
 
@@ -130,7 +130,7 @@ unemployment$predictions <- predict(unemployment_model)
 # predição X variável dependente
 ggplot(unemployment, aes(x = predictions, y = female_unemployment)) + 
   geom_point() +
-  geom_smooth(method = "lm")
+  geom_abline(color = "darkblue")
 
 # calculando o residual
 unemployment$residuals <- unemployment$female_unemployment - unemployment$predictions
@@ -280,7 +280,7 @@ rsq_test
 # visualizando as predições (no eixo x) pela variável dependente cty (no eixo y) do dataset de teste
 ggplot(mpg_test, aes(x = pred, y = cty)) + 
   geom_point() + 
-  geom_smooth(method = "lm")
+  geom_abline(color = "darkblue")
 
 ```
 
@@ -397,7 +397,7 @@ flowers$predictions <- predict(flower_model)
 # visualizando as predições
 ggplot(flowers, aes(x = predictions, y = Flowers)) + 
   geom_point() +
-  geom_smooth(method = "lm")
+  geom_abline(color = "darkblue")
 
 ```
 
@@ -514,9 +514,9 @@ fdata2 %>%
             rmse.rel = sqrt(mean(relerr^2))) # Raíz da média dos erros relativos ao quadrado
             
 # visualizando a predição de ambos grupos de compra
-ggplot(fdata2, aes(x = pred, y = y, color = label)) + 
+ggplot(fdata2, aes(x = pred, y = y)) + 
   geom_point() + 
-  geom_smooth(method = "lm") + 
+  geom_abline(color = "darkblue") + 
   facet_wrap(~ label, ncol = 1, scales = "free") + 
   ggtitle("variável dependente X predição")
 
@@ -552,7 +552,7 @@ summary(income_test$pred.income)
 # visualizando as predições X variável dependente
 ggplot(income_test, aes(x = pred.income, y = Income2005)) + 
   geom_point() + 
-  geom_abline(color = "blue")
+  geom_abline(color = "darkblue")
 
 ```
 
@@ -681,4 +681,233 @@ houseprice_long %>%
 
 O modelo quadrático tem a acurácia melhor que o modelo linear.
 
+## 7) Modelos não lineares
 
+Agora que dominamos os modelos lineares, começaremos a examinar técnicas para modelar situações que não atendam aos pressupostos da linearidade. Isso inclui:
+
+* prever probabilidades e frequências (valores limitados entre 0 e 1); 
+* previsão de contagens (valores inteiros não-negativos e taxas associadas); 
+* respostas que têm uma relação não linear, mas aditiva, com as entradas. 
+
+Esses tipos de algoritmos citados acima são variações do modelo linear padrão.
+
+### Modelo de regressão logística para prever probabilidades
+
+Aqui vamos estimar a probabilidade de um pardal sobreviver a um inverno rigoroso baseado em suas características físicas. Usaremos o dataset sparrow. A variável dependente é status, e as variáveis independentes são:
+
+* total_length: comprimento da ave da ponta do bico à ponta da cauda (mm);
+* weight: peso em gramas;
+* humerus: que é o comprimento do úmero, o "osso do braço" que liga a asa ao corpo (polegadas);
+
+Para fazer o modelo de regressão logística usaremos a função glm(), é necessário especificar o argumento *family = binomial*:
+
+Para medir a acurácia usaremos algo análogo ao R², que é o pseudo-R², que é dado por:
+
+$$pseudoR² = 1- \frac{deviance}{null.deviance} $$
+Podemos ver o deviance como algo análogo a variância: o deviance (erro) é a medida de variação em uma variável categórica. O pseudo-R² é análogo ao R² da regressão linear padrão: R² é uma medida da variância explicada pelo modelo de regressão linear. O pseudo-R² é a medida do erro explicado pelo modelo.
+
+```{r, message=FALSE, warning=FALSE}
+
+library(broom) # para a função glance()
+
+# carregando o dataset
+sparrow <- read.csv(file = "sparrow.txt" , sep = "")
+
+# verificando os quantos do dataset
+summary(sparrow)
+
+# criando a coluna survived
+sparrow$survived <- sparrow$status == "Survived"
+
+# fórmula
+fmla <- survived ~ total_length + weight + humerus
+
+# modelo de regressão logísitca
+sparrow_model <- glm(fmla, data = sparrow, family = binomial)
+
+# verificando o modelo com a função summary()
+summary(sparrow_model)
+
+# verificando o modelo com a função glance()
+perf <- glance(sparrow_model)
+
+# calculando o pseudo-R²
+pseudoR2 <- 1 - perf$deviance/perf$null.deviance
+pseudoR2
+
+```
+
+Criamos um modelo de regressão logística para prever probabilidades! Ao olhar para o pseudo-R² de um modelo de regressão logística, um valor próximo a 1 é um modelo com acurácia boa.
+
+Agora vamos prever a probabilidade de sobrevivência dos pardais usando o modelo de sobrevivência do pardal do código anterior anterior.
+
+Ao usar a função predict() para obter as probabilidades previstas de um modelo glm(), você deve especificar o argumento *type = response*, se não a função irá devolver um resultado log-odds do evento e não a probabilidade.
+
+```{r, message=FALSE, warning=FALSE}
+
+# criando coluna de predição
+sparrow$prob <- predict(sparrow_model, type = "response")
+
+```
+
+Vamos verificar a matrix de confusão desse modelo.
+
+```{r, message=FALSE, warning=FALSE}
+
+# definindo o treshold como a média das predições
+treshold <- mean(sparrow$prob)
+
+# criando coluna de predição
+sparrow$pred <- ifelse(sparrow$prob <= treshold, 0, 1)
+
+# matrix de confusão
+table(sparrow$pred, sparrow$survived)
+
+# acurácia
+mean(sparrow$pred == 1)
+
+```
+
+Podemos ver que a quantidade de verdadeiros positivos (ou seja, a quantidade de vezes que o modelo predizeu que o pardal sobreviveria quando de fato ele sobreviveu) é de 42. 
+
+A quantidade de verdadeiros negativos é de 26 (ou seja, a quantidade de vezes que o modelo predizeu que o pardal não sobreviveria quando de fato ele não sobreviveu) é de 26.
+
+O nosso modelo aqui acertou próximo de 60% das predições que fez, essa é a nossa acurácia.
+
+Agora vamos verificar a acurácia do modelo pela área abaixo da curva ROC.
+
+```{r, message=FALSE, warning=FALSE}
+
+# carregando o pacote pROC
+library(pROC)
+
+# criando a curva ROC
+ROC <- roc(sparrow$survived, sparrow$pred)
+
+# visualizando a curva ROC
+plot(ROC, col = "blue")
+
+# calculando a área abaixo da curva (AUC)
+auc(ROC)
+
+```
+
+O ROC é uma curva de probabilidade que mostra a sensitividade (taxa de verdadeiros positivos) e a especificidade (taxa de verdadeiros negativos) de vários valores de treshold, indo de 0 a 1 provavelmente, 
+
+A área abaixo da curva (AUC) ROC é uma medida de desempenho de modelos de classificação, quando a AUC é aproximadamente 0, o modelo está alternando entre as classes, isso significa que o modelo está prevendo classe negativa como uma classe positiva e vice-versa. A AUC representa o grau ou medida da separabilidade, ela informa quanto modelo é capaz de distinguir entre classes. Quanto maior a AUC, melhor o modelo prevê 0 como 0, e 1 como 1. Usando nosso exemplo, quanto maior a AUC, melhor o modelo distingue entre pardais que sobreviverão e pardais que não sobreviverão.
+
+Aqui tem uma explicação mais detalhada sobre a AUC da curva ROC: <https://towardsdatascience.com/understanding-auc-roc-curve-68b2303cc9c5>
+
+### Regressão de Poisson e quasipoisson para predizer contagens
+
+Aqui veremos como usar técnicas de regressão para predizer contagem de dados. Predizer contagens é um problema não linear, porque as contagens são restritas a serem não lineares e inteiros.
+
+* **Regressão linear:** prediz valores entre [−∞,∞]
+* **Contagens:** inteiros no intervalo entre [0,∞]
+
+Uma das regras da regressão de Poisson para prever contagens é que o evento que você está contando é uma distribição de Poisson: a contagem média por unidade de tempo é a mesma que a variância da contagem. Na prática, "o mesmo" significa que a média e a variância devem ser de uma ordem similar de magnitude.
+
+Quando a variância é muito maior que a média, a regressão de Poisson não se aplica, e uma solução é usar a regressão de quasipoisson, que não assume que variância deve ser igual a média.
+
+#### Modelo para predizer aluguél de bicicletas
+
+Neste exercício, vamos construir um modelo para prever o número de bicicletas alugadas em uma hora em função do clima, do tipo de dia (feriado, dia útil ou fim de semana) e da hora do dia. Iremos treinar o modelo com dados do mês de julho.
+
+O dataset contém as seguintes colunas:
+
+* cnt: número de bicicletas alugadas por hora (variável dependente);
+* hr: hora do dia (vai de 0 a 23);
+* holiday: TRUE/FALSE;
+* workingday: TRUE se nem é feriado e nem fim de semana, se não FALSE;
+* weathersit: variável categórica com as seguintes classes "Clear to partly cloudy", "Light Precipitation", "Misty";
+* temp: temperatura em °C;
+* atemp: sensação térmica em °C;
+* hum: huminadade
+* windspeed: velocidade do vento;
+* instant: index (não é uma variável)
+* mnth and yr: indices de mês e ano (não é uma variável)
+
+É necessário especificar o argumento *family = poisson* ou *family = quasipoisson* quando usar a função glm() para fitar um modelo de contagem.
+
+```{r, message=FALSE, warning=FALSE}
+
+# verificando a estrutura de bikesJuly
+bikesJuly <- read.csv("bikesJuly.csv", sep = ",")
+str(bikesJuly)
+
+# variável dependente
+outcome <- c("cnt")
+
+# variáveis dependentes
+vars <-  c("hr", "holiday", "workingday", "weathersit", "temp", "atemp", "hum", "windspeed")
+
+# fórmula do modelo
+fmla <- paste(outcome, "~", paste(vars, collapse = " + "))
+
+# calculando a média e a variância da variável dependente
+mean_bikes <- mean(bikesJuly$cnt)
+mean_bikes
+
+var_bikes <- var(bikesJuly$cnt)
+var_bikes
+
+# verificando a distribuição de frequência da variável dependente
+hist(bikesJuly$cnt)
+
+# fitando o modelo
+bike_model <- glm(fmla, data = bikesJuly, family = quasipoisson)
+
+# chamando glance()
+perf <- glance(bike_model)
+
+# calculando o pseudo-R²
+pseudoR2 <- 1 - perf$deviance/perf$null.deviance
+pseudoR2
+
+```
+
+Fizemos um modelo quasipoisson para prever contagens! Como no modelo de regressão logística, esperamos um pseudo-R² próximo de 1.
+
+Agora vamos usar o modelo para predições para o mês de Agosto.
+
+```{r, message=FALSE, warning=FALSE}
+
+# estrutura do bikesAugust
+bikesAugust <- read.csv("bikesAugust.csv", sep = ",")
+str(bikesAugust)
+
+# predições para o mês de agosto
+bikesAugust$pred <- predict(bike_model, newdata = bikesAugust, type = "response")
+
+# calculando o RMSE
+bikesAugust %>% 
+  mutate(residual = pred - cnt) %>%
+  summarize(rmse  = sqrt(mean(residual^2)))
+
+# visualizandoas predições X as observações da variável dependente
+ggplot(bikesAugust, aes(x = pred, y = cnt)) +
+  geom_point() + 
+  geom_abline(color = "darkblue")
+
+```
+
+Visualizamos as previsões do modelo de bicicleta usando o gráfico de dispersão "resultado versus previsão". Como os dados de aluguel de bicicletas são dados de séries temporais, talvez você esteja interessado em saber como o modelo funciona em função do tempo. Neste exercício, você comparará as previsões e aluguéis reais em uma base horária, nos primeiros 14 dias de agosto.
+
+```{r, message=FALSE, warning=FALSE}
+
+# visualizando as predições e a variável cnt por data/tempo
+bikesAugust %>% 
+  # configurando para começar em 0, convertendo unidades para dias
+  mutate(instant = (instant - min(instant))/24) %>%  
+  # juntando cnt e pred
+  gather(key = valuetype, value = value, cnt, pred) %>%
+  filter(instant < 14) %>% # somente os primeiros 14 dias
+  # visualizando...
+  ggplot(aes(x = instant, y = value, color = valuetype, linetype = valuetype)) + 
+  geom_point() + 
+  geom_line() + 
+  scale_x_continuous("Day", breaks = 0:14, labels = 0:14) + 
+  scale_color_brewer(palette = "Dark2") + 
+  ggtitle("Predicted August bike rentals, Quasipoisson model")
+
+```
