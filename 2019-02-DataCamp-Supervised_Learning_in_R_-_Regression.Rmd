@@ -833,6 +833,8 @@ O dataset contém as seguintes colunas:
 
 # verificando a estrutura de bikesJuly
 bikesJuly <- read.csv("bikesJuly.csv", sep = ",")
+bikesJuly$hr <- as.factor(bikesJuly$hr)
+bikesJuly$weathersit <- as.character(bikesJuly$weathersit)
 str(bikesJuly)
 
 # variável dependente
@@ -859,6 +861,7 @@ bike_model <- glm(fmla, data = bikesJuly, family = quasipoisson)
 
 # chamando glance()
 perf <- glance(bike_model)
+perf
 
 # calculando o pseudo-R²
 pseudoR2 <- 1 - perf$deviance/perf$null.deviance
@@ -866,7 +869,7 @@ pseudoR2
 
 ```
 
-Fizemos um modelo quasipoisson para prever contagens! Como no modelo de regressão logística, esperamos um pseudo-R² próximo de 1.
+Legal! Fizemos um modelo quasipoisson para prever contagens! Como no modelo de regressão logística, esperamos um pseudo-R² próximo de 1.
 
 Agora vamos usar o modelo para predições para o mês de Agosto.
 
@@ -874,6 +877,8 @@ Agora vamos usar o modelo para predições para o mês de Agosto.
 
 # estrutura do bikesAugust
 bikesAugust <- read.csv("bikesAugust.csv", sep = ",")
+bikesAugust$hr <- as.factor(bikesAugust$hr)
+bikesAugust$weathersit <- as.character(bikesAugust$weathersit)
 str(bikesAugust)
 
 # predições para o mês de agosto
@@ -911,3 +916,7 @@ bikesAugust %>%
   ggtitle("Predicted August bike rentals, Quasipoisson model")
 
 ```
+
+### Modelo aditivo generalizado
+
+
