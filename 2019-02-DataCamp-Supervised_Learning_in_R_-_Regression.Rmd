@@ -1,5 +1,5 @@
 ---
-title: "Aprendizagem supervisioanda com R"
+title: "Aprendizagem supervisionada em R"
 author: "Pedro Almeida"
 date: "17 de fevereiro de 2019"
 output: html_document
@@ -27,15 +27,15 @@ $$ Y = \beta_{0} + \beta_{1} \cdot X + \epsilon, \ onde \ \epsilon \sim N(0,\sig
 
 Onde:
 
-$Y$: variável explicada (dependente), representa o que o modelo tentará prever;
+*$Y$*: variável explicada (dependente), representa o que o modelo tentará prever;
 
-$\beta_{0}$: constante que representa a interceptação da reta no eixo y, ou seja, é o valor de y quando x é igual a 0; 
+*$\beta_{0}$*: constante que representa a interceptação da reta do modelo no eixo y, ou seja, é o valor de y quando x é igual a 0; 
 
-$\beta_{1}$: representa a inclinação da reta (coeficiente angular) em relação à variável explicativa;
+*$\beta_{1}$*: representa a inclinação da reta (coeficiente angular) em relação à variável independente;
 
-$X$: variável explicativa (independente);
+*$X$*: variável independente;
 
-$\epsilon$: é um termo de erro aleatório, que é independente de X e tem média zero.
+*$\epsilon$*: é um termo de erro aleatório, que é independente de X e tem média zero
 
 #### 1.1.1) Codando uma regressão linear simples em R
 
@@ -76,7 +76,7 @@ Fazendo previsões a partir do modelo:
 
 ```{r, message=FALSE, warning=FALSE}
 
-# predizendo o desemprego entre mulheres a partir da taxa de desemprego entre homens
+# prevendo o desemprego entre mulheres a partir da taxa de desemprego entre homens
 newrates <- data.frame(male_unemployment = 5) # taxa de desemprego entre homens igual a 5%
 pred <- predict(unemployment_model, newdata = newrates)
 pred
@@ -124,7 +124,7 @@ Fazendo previsões com o modelo de regressão multivariada:
 
 ```{r, message=FALSE, warning=FALSE}
 
-# predizendo pressão usando o modelo bloodpressure_model
+# prevendo pressão usando o modelo bloodpressure_model
 bloodpressure$prediction <- predict(bloodpressure_model)
 
 # visualizando os resultados
@@ -134,15 +134,15 @@ ggplot(bloodpressure, aes(x = prediction, y = blood_pressure)) +
 
 ```
 
-Os resultados do modelo ficaram bem ajustados aos dados observados da variável dependente, indicando que o modelo se ajusta bem aos dados de treinamento. A partir de uma perspectiva de previsão, a regressão linear multivariada se comporta da mesma forma que a simples (de uma variável).
+Os resultados do modelo ficaram bem ajustados aos dados observados da variável dependente, indicando que o modelo se ajusta bem aos dados de treinamento. A partir de uma perspectiva de previsão, a regressão linear multivariada se comporta da mesma forma que a simples (que possui apenas uma variável).
 
 ## 2) Avaliando e treinando modelos de regressão
 
-Agora que foram abordados os modelos mais básicos de regressão linear, veremos como avaliar o desempenho dos modelos graficamente, assim como duas métricas básicas para modelos de regressão. Também aprenderemos como treinar um modelo de modo que ele funcione bem para dados não vistos no dataset, e não apenas em dados de treinamento.
+Agora que foram abordados os modelos mais básicos de regressão linear, veremos como avaliar o desempenho dos modelos graficamente, assim como abordarei duas métricas básicas para modelos de regressão. Também aprenderemos como treinar um modelo de modo que ele funcione bem para dados não vistos no dataset, e não apenas em dados de treinamento.
 
 ### 2.1) Avaliando o modelo de regressão
 
-Aqui visualizaremos o quanto o modelo e suas previsões podem errar. Na sequência faremos o cálculo do quanto um modelo pode errar em média.
+Aqui visualizaremos o quanto o modelo e suas previsões podem errar, chamamos isso de residuais do modelo. Na sequência faremos o cálculo do quanto um modelo pode errar em média.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -165,9 +165,9 @@ ggplot(unemployment, aes(x = predictions, y = residuals)) +
 
 ```
 
-### 2.2) Raíz da média dos residuais ao quadrado
+### 2.1.1) Raíz da média dos residuais ao quadrado
 
-Em inglês é root-mean-square error (RMSE), que mostra o quanto a previsão do modelo está errando, essa é uma das métricas de acurácia de um modelo de regressão linear.
+O root-mean-square error (RMSE), em português é raíz da média dos residuais ao quadrado, que mostra o quanto a previsão do modelo está errando, essa é uma das métricas de acurácia de um modelo de regressão linear.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -186,9 +186,9 @@ sd_unemployment
 
 Um RMSE menor que o desvio padrão da variável dependente, sugere um modelo que prevê bem.
 
-### 2.3) Cálculo do R²
+### 2.1.2) Cálculo do R²
 
-Agora que vimos o RMSE das previsões do modelo, você examinará como o modelo se ajusta aos dados: ou seja, quanto de variação ele explica, e isso é feito usando R².
+Agora que vimos o RMSE das previsões do modelo, examinarei como o modelo se ajusta aos dados: ou seja, quanto de variação ele explica, e isso é feito usando R².
 
 o R² é dado por:
 
@@ -196,23 +196,9 @@ $$ R² = 1- \frac{\sum_{i=1}^n (y_i-\hat{y}_i)^2}{\sum_{i=1}^n (y_i-\overline{y}
 
 O R² sempre vai de 0 até 1, indicando em percentagem o quanto o modelo consegue explicar os valores observados da variável dependente.
 
-Uma maneira que gosto de pensar o R² é da seguinte maneira:
-
-1) Olhando a divisão sem o 1 subtraindo fica mais intuitivo entender o R²; 
-
-2) O numerador é a **soma dos quadrados dos residuais** do modelo, lembra que vimos os residuais do modelo um pouco mais acima no código? Então, aqui somamos todas as diferenças entre os valores observados da variável dependente e as previsões do modelo (que são os y com chapéu) e elevamos ao quadrado para eliminar os possíveis sinais negativos dessas subtrações;
-
-3) O denominador é a **soma dos quadrados dos erros** dos valores observados da variável dependente. Essse "erro" é a diferença entre os valores observados da variável dependente e a média da variável dependente (o y com traço em cima), elevamos ao quadrado para evitar diferenças com sinal negativo e somamos todos os quadrados dos erros;
-
-4) Legal, a divisão entre a **soma dos quadrados dos residuais** do modelo e a **soma dos quadrados dos erros** da variável dependente, nos mostra o quanto da variável dependente é explicada pelo modelo como se fosse explicada pela média da variável dependente (e claro, nós queremos que nosso modelo explique melhor do que a média da variável dependente ok?). Exemplo: se essa divisão for igual a 0,2 quer dizer que 20% da variável dependente é explicada pelo modelo assim como é explicada pela média da variável dependente, ou seja, 20% das vezes não há diferença entre os residuais do modelo (que é o quanto o modelo erra) e o erro da variável dependente;
-
-5) Logo, a soma dos residuais do modelo é bem menor que a soma dos erros da variável dependente, isso quer dizer que 80% das vezes o modelo está mais ajustado a distribuição dos dados da variável dependente e explica a variável dependente melhor que a média, ou seja 80% da variável dependente é explicada pelo modelo!
-
-Agora vamos ver na prática:
-
 ```{r, message=FALSE, warning=FALSE}
 
-# cálculo do da soma dos residuais ao quadrado (numerador)
+# cálculo da soma dos residuais ao quadrado (numerador)
 rss <- sum(unemployment$residuals^2)
 rss
 
@@ -229,16 +215,18 @@ rsq
 
 Legal! o R² é de 0,8213157, isto significa que 82,13% da variável dependente consegue ser explicada pelo modelo!
 
-### 2.3) Gerando datasets de treino e teste
+### 2.2) Gerando datasets de treino e teste
 
-Para os seguintes exemplos usarei o dataset mpg do pacote ggplot2, esse dataset contém características de vários modelos de carros com diferentes anos de fabricação. O objetivo aqui será predizer o consumo de combustível na cidade e na estrada pelos carros.
+Para os seguintes exemplos usarei o dataset mpg do pacote ggplot2, esse dataset contém características de vários modelos de carros com diferentes anos de fabricação. O objetivo aqui será prever o consumo de combustível na cidade e na estrada pelos carros.
 
-Nós iremos explodir o dataset mpg em um dataset de treino contendo 75% das observações do dataset, e um de treino contendo 25% das observações. 
+Irei explodir o dataset mpg em um dataset de treino contendo 75% das observações do dataset, e um de treino contendo 25% das observações. 
 
 ```{r, message=FALSE, warning=FALSE}
 
 # explorando o dataset
 summary(mpg)
+
+# verificando as dimensões do dataset
 dim(mpg)
 
 # criando a amostra aleatória do data set
@@ -251,18 +239,20 @@ mpg_train <- mpg[sample_rows, ]
 # criando o data set de teste
 mpg_test <- mpg[-sample_rows, ]
 
-# Use nrow() to examine mpg_train and mpg_test
+# usando o nrow() para examinar o número de observações (linhas) do dataset mpg_train
 nrow(mpg_train)
+ 
+# usando o nrow() para examinar o número de observações (linhas) do dataset mpg_test
 nrow(mpg_test)
 
 ```
 
-Treinando o modelo usando os datasets de treino e de teste:
+Treinando o modelo:
 
 ```{r, message=FALSE, warning=FALSE}
 
-# criando a fórmula expressando o consumo de combustível urbano (feature cty) em função do consumo na estrada (feature hwy)
-(fmla <- cty ~ hwy)
+# criando a fórmula expressando o consumo de combustível urbano (cty) em função do consumo na estrada (hwy)
+fmla <- cty ~ hwy
 
 # modelo utilizando o dataset de treino 
 mpg_model <- lm(fmla, data = mpg_train)
@@ -272,17 +262,17 @@ summary(mpg_model)
 
 ```
 
-A seguir utilizaremos o modelo mpg_model para previsões sobre o dataset de treino. 
+A seguir utilizarei o modelo mpg_model para previsões sobre o dataset de treino:
 
 ```{r, message=FALSE, warning=FALSE}
 
 library(Metrics) # para função rmse
 library(tsensembler) # para função r_squared
 
-# predizendo o consumo urbano de combustível pelo consumo na estrada usando o dataset de treino
+# prevendo o consumo urbano de combustível pelo consumo na estrada usando o dataset de treino
 mpg_train$pred <- predict(mpg_model)
 
-# predizendo o consumo urbano de combustível pelo consumo na estrada usando o dataset de teste
+# prevendo o consumo urbano de combustível pelo consumo na estrada usando o dataset de teste
 mpg_test$pred <- predict(mpg_model, newdata = mpg_test)
 
 # verificando o erro (RMSE) dos datasets de treino e de teste
@@ -306,11 +296,13 @@ ggplot(mpg_test, aes(x = pred, y = cty)) +
 
 ```
 
-Impressionante! O R² do dataset de teste está melhor que o dataset de treino.
+Impressionante! O R² do dataset de teste está melhor que o dataset de treino ;)
 
-### 2.4) Validação cruzada
+### 2.3) Método de validação cruzada
 
-A validação cruzada é uma técnica para avaliar a capacidade de generalização de um modelo, a partir de um conjunto de dados. Esta técnica é amplamente empregada em problemas onde o objetivo da modelagem é a previsão. Busca-se então estimar o quão preciso é este modelo na prática, ou seja, o seu desempenho para um novo conjunto de dados. Fonte: <https://pt.wikipedia.org/wiki/Validação_cruzada>
+A validação cruzada é uma técnica para avaliar a capacidade de generalização de um modelo a partir de um conjunto de dados. Esta técnica é amplamente empregada em problemas onde o objetivo da modelagem é a previsão. Busca-se então estimar o quão preciso é este modelo na prática, ou seja, o seu desempenho para um novo conjunto de dados. Fonte: <https://pt.wikipedia.org/wiki/Validação_cruzada>
+
+Validação cruzada na prática:
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -327,7 +319,7 @@ str(splitPlan)
 
 ```
 
-Agora vamos usar a lista de reamostragens criadas.
+Agora usarei a lista de reamostragens criada.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -345,7 +337,7 @@ for(i in 1:k) {
 
 ```
 
-Vamos comparar a acurácia do modelo para todos os dados e acurácia para os dados reamostrados pela validação cruzada.
+Vou comparar a acurácia do modelo sem validação cruzada com a acurácia para os dados reamostrados pela validação cruzada:
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -358,19 +350,27 @@ rmse(mpg$pred.cv, mpg$cty)
 
 ```
 
-Legal! Calculamos o erro para dados não vistos através da validação cruzada!
+Legal! Podemos ver que o erro para dados não vistos através da validação cruzada é maior!
 
-**Outras considerações:** Antes de seguir com técnicas de regressão mais avançadas, examinaremos outros problemas de modelagem: modelagem com variáveis categóricas, interações entre variáveis e quando você pode considerar a transformação de variáveis independentes (de entrada) e dependentes (de saída) antes da modelagem. Embora as técnicas de regressão mais sofisticadas gerenciem alguns desses problemas automaticamente, é importante estar ciente deles, a fim de entender quais métodos lidam melhor com esses problemas.
+**Outras considerações:** Antes de seguir com técnicas de regressão mais avançadas, examinaremos outros problemas de modelagem: 
+
+* modelagem com variáveis categóricas;
+
+* interações entre variáveis
+
+* transformação de variáveis independentes e dependentes antes da modelagem. 
+
+Embora as técnicas de regressão mais sofisticadas gerenciem alguns desses problemas automaticamente, é importante estar ciente deles, a fim de entender quais métodos lidam melhor com esses problemas.
 
 ## 3) Variáveis categóricas no modelo
 
-Nessa parte, chamaremos a função model.matrix() para examinar como o R representa dados com entradas categóricas e numéricas para modelagem. Usaremos o dataset flowers do pacote Sleuth3 que possue as seguintes variáveis:
+Nessa parte, chamarei a função model.matrix() para examinar como o R representa dados com entradas categóricas e numéricas para modelagem. Usaremos o dataset flowers do pacote Sleuth3 que possue as seguintes variáveis:
 
-* Flowers: média de flores da planta limnanthes floccosa;
+* *Flowers*: média de flores da planta **limnanthes floccosa**;
 
-* Intensity: a intensidade de de luz que a planta recebeu;
+* *Intensity*: a intensidade de de luz que a planta recebeu;
 
-* Time: com as classes Late e Early, que mostra quando que no ciclo de vida da planta ela recebeu mais luz com intensidade;
+* *Time*: possui as classes Late e Early, que mostra quando que no ciclo de vida da planta ela recebeu luz com mais intensidade;
 
 O objetivo aqui é prever a florada (Flowers) da planta em função do tempo (Time) e da intensidade de luz (Intensity).
 
@@ -389,7 +389,7 @@ unique(flowers$Time)
 # fórmula que expressa Flowers em função de Intensity e Time
 fmla <- as.formula("Flowers ~ Intensity + Time")
 
-# use o fmla e a função model.matrix para ver como os dados são representados para modelagem
+# usando o fmla e a função model.matrix para ver como os dados são representados para modelagem
 mmat <- model.matrix(fmla, flowers)
 
 # verificando as primeiras 20 linhas do dataset flowers
@@ -400,20 +400,17 @@ head(mmat, n = 20)
 
 ```
 
-Agora você pode ver como a maioria das funções de modelagem no R representam variáveis categóricas internamente.
+Agora é possível ver como a maioria das funções de modelagem no R representam variáveis categóricas internamente.
 
 ```{r, message=FALSE, warning=FALSE}
 
 # modelo
-flower_model <-  lm(fmla, data = flowers)
-
-# usando a função summary no mmat para lembrar como fica a estruta dos dados 
-summary(mmat)
+flower_model <- lm(fmla, data = flowers)
 
 # examinando o modelo
 summary(flower_model)
 
-# predizendo o número de flores
+# prevendo o número de flores
 flowers$predictions <- predict(flower_model)
 
 # visualizando as previsões
@@ -423,28 +420,24 @@ ggplot(flowers, aes(x = predictions, y = Flowers)) +
 
 ```
 
-Legal! Fizemos um modelo com variável categórica!
+Legal! Criei um modelo com variável categórica ;)
 
 ## 4) Modelando interações
 
-Nessa parte, usaremos interações entre as variáveis para modelar o efeito do gênero e da atividade gástrica no metabolismo do álcool.
+Nessa parte verificarei interações entre as variáveis para modelar o efeito do gênero e da atividade gástrica no metabolismo do álcool.
 
 O dataset alcohol possui as seguintes variáveis:
 
-* Metabol: taxa de matabolismo de álcool;
+* *Metabol*: taxa de matabolismo de álcool;
 
-* Gastric: a taxa de atividade desidrogenase gástrica do álcool;
+* *Gastric*: a taxa de atividade desidrogenase gástrica do álcool;
 
-* Sex: sexo masculino ou feminino;
+* *Sex*: sexo masculino ou feminino;
 
 ```{r, message=FALSE, warning=FALSE}
 
-library(robustbase) # para importar o dataset alcohol
-
+# importando o dataset alcohol
 alcohol <- read.csv("alcohol.csv", sep = ";")
-
-# alcohol is in the workspace
-summary(alcohol)
 
 # fórmula do modelo sem interação
 fmla_add <- Metabol ~ Gastric + Sex
@@ -466,18 +459,18 @@ summary(model_interaction)
 
 A interação entre as variáveis parece dar um melhor ajuste aos dados.
 
-Como esse dataset é pequeno, usaremos a validação cruzada para simular previsões com dados não vistos.
+Como esse dataset é pequeno, usarei a validação cruzada para simular previsões com dados não vistos.
 
 ```{r, message=FALSE, warning=FALSE}
 
 library(tidyverse) # para as funções gather, mutate etc
 
 # criando o arquivo com 3 reamostragens
-set.seed(34245)  # set the seed for reproducibility
+set.seed(34245)  # para possibilitar a reprodução do resultado desse modelo
 splitPlan <- kWayCrossValidation(nrow(alcohol), 3, NULL, NULL)
 
 # modelo das reamostragens sem interação
-alcohol$pred_add <- 0  # vetor de previsão
+alcohol$pred_add <- 0 # vetor de previsão
 
 for(i in 1:3) {
   split <- splitPlan[[i]]
@@ -503,7 +496,7 @@ alcohol %>%
 
 ```
 
-A validação cruzada mostrou aqui que um modelo com interação dá  melhores previsões.
+A validação cruzada mostrou aqui que um modelo com interação dá melhores previsões, o R² está melhor e o erro do modelo (RMSE) no caso diminuiu.
 
 ## 5) Transformação da variável dependente
 
@@ -529,7 +522,7 @@ fdata2 <- fdata %>%
   mutate(residual = pred - y, # residual
          relerr   = residual/y) # erro relativo
 
-# comparando o RMSE e o RMSE relativo dos grupos de compras grandes e pequenas:
+# comparando o RMSE com o RMSE relativo dos grupos de compras grandes e pequenas
 fdata2 %>% 
   group_by(label) %>% 
   summarize(rmse = sqrt(mean(residual^2)), # RMSE
@@ -544,9 +537,9 @@ ggplot(fdata2, aes(x = pred, y = y)) +
 
 ```
 
-Observe a partir deste exemplo como um modelo com RMSE maior ainda pode ser melhor, se os erros relativos forem mais importantes que os erros absolutos.
+É possível observar a partir deste exemplo como um modelo com RMSE maior ainda pode ser melhor, se os erros relativos forem mais importantes que os erros absolutos.
 
-Agora  veremos como modelar uma variável dependente log-transformada, usaremos o dataset income_train e income_test. 
+Agora vou modelar a variável dependente log-transformada, usarei o dataset income_train e income_test. 
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -580,7 +573,7 @@ ggplot(income_test, aes(x = pred.income, y = Income2005)) +
 
 Lembrando que quando transformarmos a variável dependente antes da modelagem, é necessário inverter a transformação das previsões resultantes após a aplicação do modelo.
 
-Agora vamos comparar o RMSE e a raíz da média dos erros relativos ao quadrado. Vamos verificar como a transformação de log da variável dependente antes da modelagem melhora o erro relativo médio (mas aumenta o RMSE) em comparação com a modelagem da variável dependente sem transformação. Você irá comparar os resultados de model.log do exercício anterior com o modelo model.abs.
+Agora vou comparar o RMSE e a raíz da média dos erros relativos ao quadrado. Vou verificar como a transformação de log da variável dependente antes da modelagem melhora o erro relativo médio (mas aumenta o RMSE) em comparação com a modelagem da variável dependente sem transformação. Você irá comparar os resultados de model.log do exercício anterior com o modelo model.abs.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -610,17 +603,17 @@ income_long %>%
 
 ```
 
-Você viu como modelar o log de renda (variável dependente) pode reduzir o erro relativo do modelo, ao custo do aumento do RMSE, aqui temos um tradeoff e a escolha de fazer a transformação da variável dependente depende dos objetivos do seu projeto.
+É evidente que modelar o log de renda (variável dependente) pode reduzir o erro relativo do modelo, ao custo do aumento do RMSE, aqui temos um tradeoff e a escolha de fazer a transformação da variável dependente depende dos objetivos do seu projeto.
 
 ## 6) Transformação da variável independente
 
-Vamos construir um modelo para predizer o preço em função do m². O dataset houseprice tem as seguintes colunas:
+Vou construir um modelo para prever o preço em função do m². O dataset houseprice tem as seguintes colunas:
 
-* price : preço da casa em unidades de $1000
+* *price*: preço da casa em unidades de $1.000
 
-* size: área
+* *size*: área
 
-O scatterplot dos dados mostram que os dados possuem uma relação não-linear: essa forma curva mostra que o preço é baixo para casas menores, mas sobe acentuadamente à medida que a casa aumenta. Os quadráticos e tríticos costumam ser boas formas funcionais para expressar esse tipo de relação entre as variáveis. Observe que pode não haver uma razão "física" para o preço estar relacionado ao m², o quadrática da variável indenpendente é simplesmente uma aproximação da relação observada.
+O scatterplot dos dados mostram que os dados possuem uma relação não-linear: essa forma curva mostra que o preço é baixo para casas menores, mas sobe acentuadamente à medida que a casa aumenta. Os quadráticos e modelos ao cubo tríticos costumam ser boas formas funcionais para expressar esse tipo de relação entre as variáveis. Observe que pode não haver uma razão "física" para o preço estar relacionado ao m², o quadrática da variável indenpendente é simplesmente uma aproximação da relação observada.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -632,7 +625,7 @@ ggplot(houseprice, aes(x = size, y = price)) +
 
 ```
 
-Na sequência vamos criar o modelo para predizer o preço em função do m², e vamos verificar o ajuste do modelo.
+Na sequência vou criar o modelo para prever o preço em função do m², e vou verificar o ajuste do modelo.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -660,7 +653,7 @@ houseprice %>%
 
 ```
 
-A seguir iremos fazer a validação cruzada do modelo linear com o modelo quadrático e verificar sua acurácia.
+A seguir irei fazer a validação cruzada do modelo linear com o modelo quadrático e verificar sua acurácia.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -701,32 +694,39 @@ houseprice_long %>%
 
 ```
 
-O modelo quadrático tem a acurácia melhor que o modelo linear.
+Obaa! Aquio o modelo quadrático tem a acurácia melhor que o modelo linear ;)
 
 ## 7) Modelos não-lineares
 
-Agora que dominamos os modelos lineares, começaremos a examinar técnicas para modelar situações que não atendam aos pressupostos da linearidade. Isso inclui:
+Agora começaei a examinar técnicas para modelar situações que não atendam aos pressupostos da linearidade. Isso inclui:
 
-* prever probabilidades e frequências (valores limitados entre 0 e 1); 
-* previsão de contagens (valores inteiros não-negativos e taxas associadas); 
-* respostas que têm uma relação não-linear, mas aditiva, com as entradas. 
+* prever probabilidades e frequências (valores limitados entre 0 e 1);
+
+* previsão de contagens (valores inteiros não-negativos e taxas associadas);
+
+* respostas que têm uma relação não-linear, mas aditiva com as entradas. 
 
 Esses tipos de algoritmos citados acima são variações do modelo linear padrão.
 
 ### 7.1) Modelo de regressão logística para prever probabilidades
 
-Aqui vamos estimar a probabilidade de um pardal sobreviver a um inverno rigoroso baseado em suas características físicas. Usaremos o dataset sparrow. A variável dependente é status, e as variáveis independentes são:
+Aqui vou estimar a probabilidade de um pardal sobreviver a um inverno rigoroso baseado em suas características físicas. 
 
-* total_length: comprimento da ave da ponta do bico à ponta da cauda (mm);
-* weight: peso em gramas;
-* humerus: que é o comprimento do úmero, o "osso do braço" que liga a asa ao corpo (polegadas);
+Usarei o dataset sparrow. A variável dependente é a *status*, e as variáveis independentes são:
 
-Para fazer o modelo de regressão logística usaremos a função glm(), é necessário especificar o argumento *family = binomial*:
+* *total_length*: comprimento da ave da ponta do bico à ponta da cauda (mm);
+* *weight*: peso em gramas;
+* *humerus*: que é o comprimento do úmero, o "osso do braço" que liga a asa ao corpo (polegadas);
 
-Para medir a acurácia usaremos algo análogo ao R², que é o pseudo-R², que é dado por:
+Para fazer o modelo de regressão logística usarei a função glm(), é necessário especificar o argumento *family = binomial*.
+
+Para medir a acurácia usarei algo análogo ao R², que é o pseudo-R², que é dado por:
 
 $$pseudoR² = 1- \frac{deviance}{null.deviance} $$
-Podemos ver o deviance como algo análogo a variância: o deviance (erro) é a medida de variação em uma variável categórica. O pseudo-R² é análogo ao R² da regressão linear padrão: R² é uma medida da variância explicada pelo modelo de regressão linear. O pseudo-R² é a medida do erro explicado pelo modelo.
+
+Podemos ver o deviance como algo análogo a variância, o deviance (erro) é a medida de variação em uma variável categórica. 
+
+O pseudo-R² é análogo ao R² da regressão linear padrão, o R² é uma medida da variância explicada pelo modelo de regressão linear, o pseudo-R² é a medida do erro explicado pelo modelo.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -735,7 +735,7 @@ library(broom) # para a função glance()
 # carregando o dataset
 sparrow <- read.csv(file = "sparrow.txt" , sep = "")
 
-# verificando os quantos do dataset
+# verificando os quantis do dataset
 summary(sparrow)
 
 # criando a coluna survived
@@ -759,11 +759,11 @@ pseudoR2
 
 ```
 
-Criamos um modelo de regressão logística para prever probabilidades! Ao olhar para o pseudo-R² de um modelo de regressão logística, um valor próximo a 1 é um modelo com acurácia boa.
+Criei um modelo de regressão logística para prever probabilidades! Ao olhar para o pseudo-R² de um modelo de regressão logística, um valor próximo a 1 é um modelo com acurácia boa.
 
-Agora vamos prever a probabilidade de sobrevivência dos pardais usando o modelo de sobrevivência do pardal do código anterior anterior.
+Agora vou prever a probabilidade de sobrevivência dos pardais usando o modelo de sobrevivência do pardal do código anterior.
 
-Ao usar a função predict() para obter as probabilidades previstas de um modelo glm(), você deve especificar o argumento *type = response*, se não a função irá devolver um resultado log-odds do evento e não a probabilidade.
+Ao usar a função predict() para obter as probabilidades de um modelo derado com a função glm(), é necessário especificar o argumento *type = response*, se não a função irá devolver um resultado log-odds do evento e não a probabilidade.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -772,7 +772,7 @@ sparrow$prob <- predict(sparrow_model, type = "response")
 
 ```
 
-Vamos verificar a matrix de confusão desse modelo.
+Verificando a matriz de confusão desse modelo.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -782,7 +782,7 @@ treshold <- mean(sparrow$prob)
 # criando coluna de previsão
 sparrow$pred <- ifelse(sparrow$prob <= treshold, 0, 1)
 
-# matrix de confusão
+# matriz de confusão
 table(sparrow$pred, sparrow$survived)
 
 # acurácia
@@ -794,9 +794,9 @@ Podemos ver que a quantidade de verdadeiros positivos (ou seja, a quantidade de 
 
 A quantidade de verdadeiros negativos é de 26 (ou seja, a quantidade de vezes que o modelo predizeu que o pardal não sobreviveria quando de fato ele não sobreviveu) é de 26.
 
-O nosso modelo aqui acertou próximo de 60% das previsões que fez, essa é a nossa acurácia.
+O nosso modelo aqui acertou próximo de 60% das previsões que fez, essa é a nossa acurácia, porém essa não é a melhor maneira de verificar a acurárica desse tipo de modelo.
 
-Agora vamos verificar a acurácia do modelo pela área abaixo da curva ROC.
+Agora vou verificar a acurácia do modelo pela área abaixo da curva ROC.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -814,40 +814,50 @@ auc(ROC)
 
 ```
 
-O ROC é uma curva de probabilidade que mostra a sensitividade (taxa de verdadeiros positivos) e a especificidade (taxa de verdadeiros negativos) de vários valores de treshold, indo de 0 a 1 provavelmente, 
+O ROC é uma curva de probabilidade que mostra a sensitividade (taxa de verdadeiros positivos) e a especificidade (taxa de verdadeiros negativos) de vários valores de treshold, indo de 0 a 1. 
 
 A área abaixo da curva (AUC) ROC é uma medida de desempenho de modelos de classificação, quando a AUC é aproximadamente 0, o modelo está alternando entre as classes, isso significa que o modelo está prevendo classe negativa como uma classe positiva e vice-versa. A AUC representa o grau ou medida da separabilidade, ela informa quanto modelo é capaz de distinguir entre classes. Quanto maior a AUC, melhor o modelo prevê 0 como 0, e 1 como 1. Usando nosso exemplo, quanto maior a AUC, melhor o modelo distingue entre pardais que sobreviverão e pardais que não sobreviverão.
 
 Aqui tem uma explicação mais detalhada sobre a AUC da curva ROC: <https://towardsdatascience.com/understanding-auc-roc-curve-68b2303cc9c5>
 
-### 7.2) Regressão de Poisson e quasipoisson para predizer contagens
+### 7.2) Regressão de Poisson e quasipoisson para prever contagens
 
-Aqui veremos como usar técnicas de regressão para predizer contagem de dados. Predizer contagens é um problema não linear, porque as contagens são restritas a serem não lineares e inteiros.
+Aqui veremos como usar técnicas de regressão para prever contagem de dados. prever contagens é um problema não linear, porque as contagens são restritas a serem não lineares e inteiros.
 
 * **Regressão linear:** prediz valores entre [−∞,∞]
 * **Contagens:** inteiros no intervalo entre [0,∞]
 
-Uma das regras da regressão de Poisson para prever contagens é que o evento que você está contando é uma distribição de Poisson: a contagem média por unidade de tempo é a mesma que a variância da contagem. Na prática, "o mesmo" significa que a média e a variância devem ser de uma ordem similar de magnitude.
+Uma das regras da regressão de Poisson para prever contagens é que o evento que você está contando seja uma distribição de Poisson: a contagem média por unidade de tempo é a mesma que a variância da contagem. Na prática, "o mesmo" significa que a média e a variância devem ser de uma ordem similar de magnitude.
 
-Quando a variância é muito maior que a média, a regressão de Poisson não se aplica, e uma solução é usar a regressão de quasipoisson, que não assume que variância deve ser igual a média.
+Quando a variância é muito maior que a média, a regressão de Poisson não se aplica, e uma solução é usar a regressão de quasipoisson, que não assume que a variância deve ser igual a média.
 
-#### 7.2.1) Modelo para predizer aluguel de bicicletas
+#### 7.2.1) Modelo para prever aluguel de bicicletas
 
-Neste exercício, vamos construir um modelo para prever o número de bicicletas alugadas em uma hora em função do clima, do tipo de dia (feriado, dia útil ou fim de semana) e da hora do dia. Iremos treinar o modelo com dados do mês de julho.
+Aqui vou construir um modelo para prever o número de bicicletas alugadas em uma hora em função do clima, do tipo de dia (feriado, dia útil ou fim de semana) e da hora do dia. Irei treinar o modelo com dados do mês de julho.
 
 O dataset contém as seguintes colunas:
 
-* cnt: número de bicicletas alugadas por hora (variável dependente);
-* hr: hora do dia (vai de 0 a 23);
-* holiday: TRUE/FALSE;
-* workingday: TRUE se nem é feriado e nem fim de semana, se não FALSE;
-* weathersit: variável categórica com as seguintes classes "Clear to partly cloudy", "Light Precipitation", "Misty";
-* temp: temperatura em °C;
-* atemp: sensação térmica em °C;
-* hum: huminadade
-* windspeed: velocidade do vento;
-* instant: index (não é uma variável)
-* mnth and yr: indices de mês e ano (não é uma variável)
+* *cnt*: número de bicicletas alugadas por hora (variável dependente);
+
+* *hr*: hora do dia (vai de 0 a 23);
+
+* *holiday*: TRUE/FALSE;
+
+* *workingday*: TRUE se nem é feriado e nem fim de semana, se não FALSE;
+
+* *weathersit*: variável categórica com as seguintes classes "Clear to partly cloudy", "Light Precipitation", "Misty";
+
+* *temp*: temperatura em °C;
+
+* *atemp*: sensação térmica em °C;
+
+* *hum*: huminadade;
+
+* *windspeed*: velocidade do vento;
+
+* *instant*: index (não é uma variável);
+
+* *mnth* e *yr*: indices de mês e ano (não é uma variável)
 
 É necessário especificar o argumento *family = poisson* ou *family = quasipoisson* quando usar a função glm() para fitar um modelo de contagem.
 
@@ -891,9 +901,9 @@ pseudoR2
 
 ```
 
-Legal! Fizemos um modelo quasipoisson para prever contagens! Como no modelo de regressão logística, esperamos um pseudo-R² próximo de 1.
+Legal! Fiz um modelo quasipoisson para prever contagens! Como no modelo de regressão logística, esperamos um pseudo-R² próximo de 1.
 
-Agora vamos usar o modelo para previsões para o mês de Agosto.
+Agora vou usar o modelo para previsões para o mês de Agosto.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -911,14 +921,14 @@ bikesAugust %>%
   mutate(residual = pred - cnt) %>%
   summarize(rmse  = sqrt(mean(residual^2)))
 
-# visualizandoas previsões X as observações da variável dependente
+# visualizando as previsões X as observações da variável dependente
 ggplot(bikesAugust, aes(x = pred, y = cnt)) +
   geom_point() + 
   geom_abline(color = "darkblue")
 
 ```
 
-Visualizamos as previsões do modelo de bicicleta usando o gráfico de dispersão "resultado versus previsão". Como os dados de aluguel de bicicletas são dados de séries temporais, talvez você esteja interessado em saber como o modelo funciona em função do tempo. Neste exercício, você comparará as previsões e aluguéis reais em uma base horária, nos primeiros 14 dias de agosto.
+Visualizamos as previsões do modelo de bicicleta usando o gráfico de dispersão "resultado versus previsão". Como os dados de aluguel de bicicletas são dados de séries temporais, é melhor saber como o modelo funciona em função do tempo. A seguir vou  comparr as previsões e aluguéis reais em uma base horária, nos primeiros 14 dias de agosto.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -945,10 +955,11 @@ quasipoisson_plot
 
 #### 7.3.1) Modelo de crescimento da soja com modelo aditivo generalizado
 
-Aqui iremos modelar o peso médio da folha em uma planta de soja em função do tempo (após o plantio). Como você verá, a planta de soja não cresce a uma taxa constante, a taxa de creciemnto dela é como se houvesse um surto de crescimento, que eventualmente diminui. Assim, o peso da folha não é bem descrito por um modelo linear.
+Aqui irei modelar o peso médio da folha em uma planta de soja em função do tempo (após o plantio). Como você verá, a planta de soja não cresce a uma taxa constante, a taxa de creciemnto dela é como se houvesse um surto de crescimento, que eventualmente diminui. Assim, o peso da folha não é bem descrito por um modelo linear.
 
 * Para modelar uma variável de forma não linear é só usar a função s(): *y ~ s(x)*
-* O modelo aditivo generalizado é dade pela função gam() do pacote mgcv: *gam(formula, family, data)*
+
+* O modelo aditivo generalizado é dada pela função gam() do pacote mgcv: *gam(formula, family, data)*
 
 Para a regressão padrão, usar o argumento configurado como *family = gaussian*.
 
@@ -1025,22 +1036,26 @@ soybean_long %>%
 
 ```
 
-O modelo aditivo generalizado aprende a função não linear de crescimento das plantas de soja.
+O modelo aditivo generalizado aprende melhor a função não-linear de crescimento das plantas de soja ;)
 
 ## 8) Modelos de árvore de decisão
 
-Neste capítulo, veremos algoritmos de modelagem que não assumem linearidade ou aditividade e que podem aprender tipos limitados de interação entre variáveis de entrada. Esses algoritmos são métodos baseados em árvore, que funcionam combinando conjuntos de árvores de decisão que são aprendidas com os dados de treinamento.
+Aqui abordarei algoritmos de modelagem que não assumem linearidade ou aditividade e que podem aprender tipos limitados de interação entre variáveis de entrada. Esses algoritmos são métodos baseados em árvore, que funcionam combinando conjuntos de árvores de decisão que são aprendidas com os dados de treinamento.
 
 ### 8.1) Modelo de random forest para previsão de aluguel de bicicletas
 
-Nesse exercício  contruiremos novamente o modelo para predizer o número de alugueis de bicicleta em uma hora em função do clima, do tipo de dia (se é feriado, dia de trabalho, ou final de semana). Treinaremos o modelo para o mês de Julho.
+Aqui farei novamente o modelo para prever o número de alugueis de bicicleta em uma hora em função do clima, do tipo de dia (se é feriado, dia de trabalho, ou final de semana). Treinarei o modelo para o mês de Julho.
 
-Usaremos o pacote rangerpara  criar o modelo de random forest. Os argumentos que utilizaremos da função ranger() são:
+Usarei o pacote ranger para criar o modelo de random forest. Os argumentos que utilizaremos da função ranger() são:
 
-* *formula*
-* *data*
-* *num.trees*: número de árvores da "floresta"
-* *respect.unordered.factors*: especifica como tratar as variáveis fator não ordenadas, é recomendado configurar o argumento para "order" para modeos de regressão.
+* *formula*;
+
+* *data*;
+
+* *num.trees*: número de árvores da "floresta";
+
+* *respect.unordered.factors*: especifica como tratar as variáveis fator não ordenadas, é recomendado configurar o argumento para "order" para modelos de regressão;
+
 * *seed*: por ser um algoritmo de aleatorização, devemos configurar o argumento seed para permitir a reprodução dos resultados
 
 ```{r, message=FALSE, warning=FALSE}
@@ -1057,7 +1072,9 @@ bike_model_rf
 
 ```
 
-Muito bom! Criamos um modelo dos dados com um com R². No próximo exercício, você verá como ele funciona nos dados de validação.
+Criei um modelo de random forest com um bom R². 
+
+A seguir mostrarei como ele funciona nos dados de validação.
 
 Prevendo alugueis de bicicletas com o modelo de random forest:
 
@@ -1078,11 +1095,11 @@ ggplot(bikesAugust, aes(x = pred, y = cnt)) +
 
 ```
 
-No exercício anterior, você viu que o modelo de random forest para aluguel de bicicleta ficou melhor do que o modelo  de quasipoisson, quando comparamos o RMSE.
+É possível notar que o modelo de random forest para aluguel de bicicletas ficou melhor do que o modelo  de quasipoisson, quando comparamos o RMSE.
 
-Neste exercício, você visualizará as previsões de agosto do modelo de random forest em função do tempo. O gráfico correspondente do modelo de quasipoisson que você construiu em um exercício anterior está na área de trabalho para você comparar.
+Agora vou visualizações das previsões de agosto do modelo de random forest em função do tempo.
 
-Lembre-se de que o modelo de quasipoisson identificou principalmente o padrão de horas lentas e ocupadas no dia, mas subestimou um pouco as demandas de pico. Vamos ver como o modelo de random forest lida com isso.
+Lembre-se de que o modelo de quasipoisson identificou principalmente o padrão de horas com menos alugueis no dia, mas subestimou um pouco as demandas de pico. Vamos ver como o modelo de random forest lida com isso.
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -1105,9 +1122,11 @@ randomforest_plot
 
 ```
 
-Bom trabalho! O modelo de random forest capturou as variações do dia-a-dia na demanda de pico melhor do que o modelo de quasipoisson, mas ainda subestima a demanda de pico e também superestima a demanda mínima. Portanto, ainda há espaço para melhorias.
+O modelo de random forest capturou as variações do dia-a-dia na demanda de pico melhor do que o modelo de quasipoisson, mas ainda subestima a demanda de pico e também superestima a demanda mínima. Portanto, ainda há possibilidade de melhorias.
 
-### 8.2) One-Hot-Encoding para variáveis categóricas
+### 8.2) One-Hot-Encoding para uso do dataset pelo xgboost ;)
+
+Boa explicação dessa técnica: <https://hackernoon.com/what-is-one-hot-encoding-why-and-when-do-you-have-to-use-it-e3c6186d008f?gi=d5f0d8889c3a>
 
 #### 8.2.1) vtreat em um pequeno exemplo
 
@@ -1157,7 +1176,7 @@ testframe.treat <- prepare(treatplan, testframe, varRestriction = newvars)
 
 ```
 
-Bom trabalho! Como você viu, o vtreat codifica cores novas como o amarelo que não estava presente nos dados. Isso permite que o modelo aceite esses novos valores sem causar falhas.
+Como você viu, o vtreat codifica cores novas como o amarelo que não estava presente nos dados. Isso permite que o modelo aceite esses novos valores sem causar falhas.
 
 #### 8.2.2) vtreat nos dados de aluguel de bicicletas
 
@@ -1193,23 +1212,31 @@ Perfeito! Os dados agora estão em formato totalmente numérico, prontos para us
 
 #### 8.3.1) Encontrando o número certo de árvores para o gradient boosting machines
 
-Neste exercício, você estará pronto para construir um modelo xgboost para prever o número de bicicletas alugadas em uma hora em função do clima, do tipo e da hora do dia. Você treinará o modelo com dados do mês de julho.
+Agora estou pronto para construir um modelo xgboost para prever o número de bicicletas alugadas em uma hora em função do clima, do tipo e da hora do dia. Treinarei o modelo com dados do mês de julho.
 
 Lembre-se que bikesJuly.treat não tem mais a coluna de resultados, então você deve obtê-lo dos dados não tratados: bikesJuly$cnt.
 
-Você usará o pacote xgboost para ajustar o modelo random forest. A função xgb.cv() usa validação cruzada para estimar o erro de aprendizado fora da amostra à medida que cada nova árvore é adicionada ao modelo. O número apropriado de árvores a ser usado no modelo final é o número que minimiza o RMSE.
+Usarei o pacote xgboost para ajustar o modelo random forest. A função xgb.cv() usa validação cruzada para estimar o erro de aprendizado fora da amostra à medida que cada nova árvore é adicionada ao modelo. O número apropriado de árvores a ser usado no modelo final é o número que minimiza o RMSE.
 
-For this exercise, the key arguments to the xgb.cv() call are:
+Para esse exercício os argumentos da função xgb.cv() são:
 
-* data: a numeric matrix.
-* label: vector of outcomes (also numeric).
-* nrounds: the maximum number of rounds (trees to build).
-* nfold: the number of folds for the cross-validation. 5 is a good number.
-* objective: "reg:linear" for continuous outcomes.
-* eta: the learning rate.
-* max_depth: depth of trees.
-* early_stopping_rounds: after this many rounds without improvement, stop.
-* verbose: 0 to stay silent.
+* *data*: matrix númerica;
+
+* *label*: vetor númerico com a variável dependente;
+
+* *nrounds*: número máximo de árvores que serão contruídas;
+
+* *nfold*: número de reamostragens na validação cruzada (5 é um bom número);
+
+* *objective*: "reg:linear" para variáveis dependentes contínuas;
+
+* *eta*: taxa de aprendizado;
+
+* *max_depth*: tamanho das árvores;
+
+* *early_stopping_rounds*: após rodar muitas sem melhoria o modelo para;
+
+* *verbose*: "0" para permanecer em silêncio
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -1225,48 +1252,46 @@ cv <- xgb.cv(data = as.matrix(bikesJuly.treat),
             eta = 0.3,
             max_depth = 6,
             early_stopping_rounds = 10,
-            verbose = 0   # silent
-)
+            verbose = 0)
 
-# Get the evaluation log
+# criando o objeto do evaluation log
 elog <- cv$evaluation_log
 
-# Determine and print how many trees minimize training and test error
+# determinando e visualizando quantas árvores minimizão os erros no treino e no teste
 elog %>% 
-  summarize(ntrees.train = which.min(train_rmse_mean),   # find the index of min(train_rmse_mean)
-            ntrees.test  = which.min(test_rmse_mean))    # find the index of min(test_rmse_mean)
+  summarize(ntrees.train = which.min(train_rmse_mean),
+            ntrees.test  = which.min(test_rmse_mean))
 
 ```
 
-Muito bom! Na maioria dos casos, ntrees.test é menor que ntrees.train. O erro de treinamento continua diminuindo mesmo depois que o erro de teste começa a aumentar. É importante usar validação cruzada para encontrar o número correto de árvores (conforme determinado pelo ntrees.test) e evitar um modelo de overfit.
+Na maioriadas vezes, ntrees.test é menor que ntrees.train. O erro de treinamento continua diminuindo mesmo depois que o erro de teste começa a aumentar. É importante usar a validação cruzada para encontrar o número correto de árvores (conforme determinado pelo ntrees.test) e evitar um modelo com overfit.
 
-#### modelo de xgboost para previsão de aluguel de bicicletas 
+#### 8.3.2) Modelo de xgboost para previsão de aluguel de bicicletas 
 
 ```{r, message=FALSE, warning=FALSE}
 
-# Run xgboost
-bike_model_xgb <- xgboost(data = as.matrix(bikesJuly.treat), # training data as matrix
-                   label = bikesJuly$cnt,  # column of outcomes
-                   nrounds = 87,       # number of trees to build
-                   objective = "reg:linear", # objective
+# rodando o xgboost
+bike_model_xgb <- xgboost(data = as.matrix(bikesJuly.treat), # treinando os dados da matrix
+                   label = bikesJuly$cnt, # coluna com a variável dependente
+                   nrounds = 87, # número de árvores que serão contruídas
+                   objective = "reg:linear",
                    eta = 0.3,
                    depth = 6,
-                   verbose = 0  # silent
-)
+                   verbose = 0)
 
-# Make predictions
+# fazendo previsões
 bikesAugust$pred <- predict(bike_model_xgb, as.matrix(bikesAugust.treat))
 
-# Plot predictions vs actual bike rental count
+# visualizando previsões X dados de aluguel de bicicletas atuais
 ggplot(bikesAugust, aes(x = pred, y = cnt)) + 
   geom_point() + 
   geom_abline(color = "darkblue")
 
 ```
 
-Boa! No geral, o gráfico de dispersão parecia muito bom, mas você notou que o modelo fez algumas previsões negativas? No próximo exercício, você comparará o RMSE deste modelo com os modelos de bicicletas anteriores que você construiu.
+O gráfico de dispersão parecia muito bom, mas você notou que o modelo fez algumas previsões negativas? A seguir vou comparar o RMSE deste modelo com os modelos de bicicletas anteriores que você construiu.
 
-#### Avaliando o modelo de xgboost para aluguel de bicicletas
+#### 8.3.3) Avaliando o modelo de xgboost para aluguel de bicicletas
 
 ```{r, message=FALSE, warning=FALSE}
 
@@ -1279,21 +1304,21 @@ bikesAugust %>%
 
 Mesmo que esse aumento de gradiente tenha feito algumas previsões negativas, no geral ele gera erros menores do que os dois modelos anteriores. Talvez arredondar previsões negativas até zero seja uma troca razoável.
 
-#### Visualizando o modelo de xgboost para aluguel de bicicletas
+#### 8.3.4) Visualizando o modelo de xgboost para aluguel de bicicletas
 
 ```{r, message=FALSE, warning=FALSE}
 
-# Print quasipoisson_plot
+# visualizando as previsões utilizando quasipoisson
 quasipoisson_plot
 
-# Print randomforest_plot
+# visualizando as previsões utilizando random forest
 randomforest_plot
 
-# Plot predictions and actual bike rentals as a function of time (days)
+# visualizando as previsões utilizando xgboost
 bikesAugust %>% 
-  mutate(instant = (instant - min(instant))/24) %>%  # set start to 0, convert unit to days
+  mutate(instant = (instant - min(instant))/24) %>%  # configurando oinício para o dia 0, convertendo unidades em dias
   gather(key = valuetype, value = value, cnt, pred) %>%
-  filter(instant < 14) %>% # first two weeks
+  filter(instant < 14) %>% # primeiras duas semanas
   ggplot(aes(x = instant, y = value, color = valuetype, linetype = valuetype)) + 
   geom_point() + 
   geom_line() + 
@@ -1303,4 +1328,4 @@ bikesAugust %>%
 
 ```
 
-Bom trabalho! O padrão de aumento de gradiente captura variações de aluguel devido à hora do dia e outros fatores melhor que os modelos anteriores. Parabéns pela conclusão do curso!
+Ótimo! Podemos perceber nas previsões utilizando o xgboost que houve um aumento na precisão da previsão, o xgboost captura variações de aluguel em função da hora do dia e outros fatores melhor que os modelos anteriores!
