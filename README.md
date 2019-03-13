@@ -6,7 +6,7 @@ Baseado no curso Supervised Learning in R: Regression da DataCamp.
 
 * É necessário instalar os seguintes pacotes do R para rodar o código: ggplot2, Metrics, tsensembler, vtreat, Sleuth3, tidyverse, readxl, broom, pROC, mgcv, ranger, magrittr, xgboost.
 
-Conteúdo:
+Conteúdo do tutorial:
 
 1 - O que é uma regressão?:
 1.1) Regressão linear simples;
