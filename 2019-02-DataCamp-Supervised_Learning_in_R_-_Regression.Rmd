@@ -1,5 +1,5 @@
 ---
-title: "Aprendizagem supervisionada em R"
+title: "Aprendizagem Supervisionada de Regressão em R"
 author: "Pedro Almeida"
 date: "17 de fevereiro de 2019"
 output: html_document
