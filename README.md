@@ -8,9 +8,9 @@ Baseado no curso Supervised Learning in R: Regression da DataCamp.
 
 Conteúdo:
 
-1) O que é uma regressão?
+1 - O que é uma regressão?
 
-1.1) Regressão linear simples
+1.1 - Regressão linear simples
 
 1.1.1) Codando uma regressão linear simples em R
 
