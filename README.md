@@ -8,12 +8,12 @@ Baseado no curso Supervised Learning in R: Regression da DataCamp.
 
 Conteúdo do tutorial:
 
-### 1 - O que é uma regressão?:
+### 1 - O que é uma regressão?
 1.1) Regressão linear simples;
 1.1.1) Codando uma regressão linear simples em R;
 1.2) Regressão multivariada
 
-### 2 - Avaliando e treinando modelos de regressão:
+### 2 - Avaliando e treinando modelos de regressão
 2.1) Avaliando o modelo de regressão;
 2.1.1) Raíz da média dos residuais ao quadrado;
 2.1.2) Cálculo do R²;
@@ -28,14 +28,14 @@ Conteúdo do tutorial:
 
 ### 6 - Transformação da variável independente
 
-### 7 - Modelos não-lineares:
+### 7 - Modelos não-lineares
 7.1) Modelo de regressão logística para prever probabilidades;
 7.2) Regressão de Poisson e quasipoisson para prever contagens;
 7.2.1) Modelo para prever aluguel de bicicletas;
 7.3) Modelo aditivo generalizado;
 7.3.1) Modelo de crescimento da soja com modelo aditivo generalizado
 
-### 8 - Modelos de árvore de decisão:
+### 8 - Modelos de árvore de decisão
 8.1) Modelo de random forest para previsão de aluguel de bicicletas;
 8.2) One-Hot-Encoding para uso do dataset pelo xgboost;
 8.2.1) vtreat em um pequeno exemplo;
