@@ -1,6 +1,6 @@
 # Tutorial de aprendizagem supervisionada de regressão em R
 
-Baseado no curso Supervised Learning in R: Regression da DataCamp.
+Machine learning (ou aprendizagem de máquina) é a utilização de métodos estatísticos computacionais para aprender sobre dados e conseguir insights para tomada de decisão através da realização de previsões ou inferência sobre as variáveis independentes. Esse RMarkdown foca em um tipo de machine learning chamado aprendizagem supervisionada de regressão. Prever o preços de imóveis, salários ou até mesmo a probabilidade de algo acontecer são alguns exemplos de problemas de regressão.
 
 * O código está no formato do RMarkdown.
 
@@ -45,3 +45,5 @@ Conteúdo do tutorial:
 8.3.2) Modelo de xgboost para previsão de aluguel de bicicletas;
 8.3.3) Avaliando o modelo de xgboost para aluguel de bicicletas;
 8.3.4) Visualizando o modelo de xgboost para aluguel de bicicletas
+
+Baseado no curso Supervised Learning in R: Regression da DataCamp
