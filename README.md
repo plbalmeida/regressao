@@ -1,6 +1,6 @@
 # Tutorial de aprendizagem supervisionada de regressão em R
 
-Machine learning (ou aprendizagem de máquina) é a utilização de métodos estatísticos computacionais para aprender sobre dados e conseguir insights para tomada de decisão através da realização de previsões ou inferência sobre as variáveis independentes. Esse RMarkdown foca em um tipo de machine learning chamado aprendizagem supervisionada de regressão. Prever o preços de imóveis, salários ou até mesmo a probabilidade de algo acontecer são alguns exemplos de problemas de regressão.
+Machine learning (ou aprendizagem de máquina) é a utilização de métodos estatísticos computacionais para aprender sobre dados e conseguir insights para tomada de decisão através da realização de previsões ou inferência sobre as variáveis independentes. Esse RMarkdown foca em um tipo de machine learning chamado aprendizagem supervisionada de regressão. Prever o preços de imóveis ou unidades que poderão ser vendidades de um produto, são exemplos de problemas de regressão.
 
 * O código está no formato do RMarkdown.
 
