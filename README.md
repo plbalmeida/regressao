@@ -3,8 +3,7 @@
 Machine learning (ou aprendizagem de máquina) é a utilização de métodos estatísticos computacionais para aprender sobre dados e conseguir insights para tomada de decisão através da realização de previsões ou inferência sobre as variáveis independentes. Esse RMarkdown foca em um tipo de machine learning chamado aprendizagem supervisionada de regressão. Prever as unidades que serão vendidas de determinado produto ou prever preços de imóveis são exemplos de problemas de regressão.
 
 * O código está no formato do RMarkdown.
-
-* É necessário instalar os seguintes pacotes do R para rodar o código: ggplot2, Metrics, tsensembler, vtreat, Sleuth3, tidyverse, readxl, broom, pROC, mgcv, ranger, magrittr, xgboost.
+* É necessário instalar o(s) seguinte(s) pacote(s) do R para rodar o código: ggplot2, Metrics, tsensembler, vtreat, Sleuth3, tidyverse, readxl, broom, pROC, mgcv, ranger, magrittr, xgboost.
 
 Conteúdo do tutorial:
 
