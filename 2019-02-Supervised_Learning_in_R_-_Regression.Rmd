@@ -1331,3 +1331,5 @@ bikesAugust %>%
 ```
 
 Ótimo! Podemos perceber nas previsões utilizando o xgboost que houve um aumento na precisão da previsão, o xgboost captura variações de aluguel em função da hora do dia e outros fatores melhor que os modelos anteriores!
+
+# Fim ;*
